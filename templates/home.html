@@ -89,27 +89,13 @@
             background: rgba(26, 26, 46, 0.3);
         }
 
-        .promo-banner {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            background: linear-gradient(90deg, #8b5cf6, #a855f7);
-            color: white;
-            text-align: center;
-            padding: 0.5rem;
-            font-size: 0.9rem;
-            z-index: 100;
-            animation: slideDown 0.5s ease-out;
-        }
-
         @keyframes slideDown {
             from { transform: translateY(-100%); }
             to { transform: translateY(0); }
         }
 
         .header {
-            margin-top: 40px;
+            margin-top: 10px;
         }
 
         .logo {
@@ -124,75 +110,6 @@
             content: "🎨";
             margin-right: 0.5rem;
             font-size: 1.8rem;
-        }
-
-        .nav {
-            display: flex;
-            gap: 2rem;
-            list-style: none;
-        }
-
-        .nav a {
-            color: rgba(255, 255, 255, 0.8);
-            text-decoration: none;
-            transition: color 0.3s ease;
-            position: relative;
-        }
-
-        .nav a:hover {
-            color: #8b5cf6;
-        }
-
-        .nav a::after {
-            content: '';
-            position: absolute;
-            bottom: -5px;
-            left: 0;
-            width: 0;
-            height: 2px;
-            background: #8b5cf6;
-            transition: width 0.3s ease;
-        }
-
-        .nav a:hover::after {
-            width: 100%;
-        }
-
-        .auth-buttons {
-            display: flex;
-            gap: 1rem;
-        }
-
-        .btn-secondary {
-            background: transparent;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            color: white;
-            padding: 0.5rem 1.5rem;
-            border-radius: 25px;
-            text-decoration: none;
-            transition: all 0.3s ease;
-        }
-
-        .btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.1);
-            border-color: #8b5cf6;
-        }
-
-        .btn-primary {
-            background: linear-gradient(45deg, #8b5cf6, #a855f7);
-            border: none;
-            color: white;
-            padding: 0.5rem 1.5rem;
-            border-radius: 25px;
-            text-decoration: none;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(139, 92, 246, 0.3);
         }
 
         /* Main Content */
@@ -250,12 +167,6 @@
             margin-bottom: 3rem;
             max-width: 600px;
             line-height: 1.6;
-        }
-
-        .cta-buttons {
-            display: flex;
-            gap: 1.5rem;
-            margin-bottom: 4rem;
         }
 
         .btn-large {
@@ -344,17 +255,8 @@
 
         /* Responsive */
         @media (max-width: 768px) {
-            .nav {
-                display: none;
-            }
-
             .hero-title {
                 font-size: 2.5rem;
-            }
-
-            .cta-buttons {
-                flex-direction: column;
-                gap: 1rem;
             }
 
             .features-preview {
@@ -395,9 +297,6 @@
     </style>
 </head>
 <body>
-    <div class="promo-banner">
-        🎉 专业 AI 操作，特价仅为 5 美元！立即生成 ✨
-    </div>
 
     <div class="bg-animation">
         <div class="floating-element"></div>
@@ -408,27 +307,11 @@
 
     <header class="header">
         <div class="logo">Artifex AI</div>
-        <nav>
-            <ul class="nav">
-                <li><a href="#product">产品</a></li>
-                <li><a href="#features">特征</a></li>
-                <li><a href="#examples">使用案例</a></li>
-                <li><a href="#resources">资源</a></li>
-                <li><a href="#ai-photo">AI 摄影</a></li>
-                <li><a href="#pricing">定价</a></li>
-                <li><a href="#api">工具和 API</a></li>
-            </ul>
-        </nav>
-        <div class="auth-buttons">
-            <a href="#trial" class="btn-secondary">免费试用</a>
-            <a href="#login" class="btn-secondary">登录</a>
-            <a href="#register" class="btn-primary">登记</a>
-        </div>
     </header>
 
     <main class="main-content">
         <div class="product-badge">
-            🏆 PRODUCT HUNT #1 Product of the Day
+            🏆 ALWAYS #1 in Digital Image Process
         </div>
 
         <h1 class="hero-title">释放数字摄影的全部潜力</h1>
@@ -436,11 +319,6 @@
         <p class="hero-subtitle">
             实时图像转换、优化和数字资产管理，以提供独一无二的视觉体验和更好的 AI 参与度
         </p>
-
-        <div class="cta-buttons">
-            <a href="#demo" class="btn-large btn-demo">预约演示</a>
-            <a href="#start" class="btn-large btn-start">免费开始</a>
-        </div>
 
         <div class="features-preview">
             <div class="feature-card clickable" id="basic-function">
@@ -590,27 +468,6 @@
             }, 300);
         });
 
-
-
-        // Add click animations to buttons
-        document.querySelectorAll('.btn-primary, .btn-start').forEach(btn => {
-            btn.addEventListener('click', function(e) {
-                let ripple = document.createElement('span');
-                ripple.style.position = 'absolute';
-                ripple.style.borderRadius = '50%';
-                ripple.style.background = 'rgba(255,255,255,0.6)';
-                ripple.style.transform = 'scale(0)';
-                ripple.style.animation = 'ripple 0.6s linear';
-                ripple.style.left = (e.clientX - e.target.offsetLeft) + 'px';
-                ripple.style.top = (e.clientY - e.target.offsetTop) + 'px';
-
-                this.appendChild(ripple);
-
-                setTimeout(() => {
-                    ripple.remove();
-                }, 600);
-            });
-        });
 
         // Add CSS for ripple animation
         const style = document.createElement('style');

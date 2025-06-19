@@ -443,17 +443,23 @@
         </div>
 
         <div class="features-preview">
+            <div class="feature-card clickable" id="basic-function">
+                <span class="feature-icon">🧱</span>
+                <h3 class="feature-title">基本图像处理</h3>
+                <p class="feature-desc">课内基本图像处理功能</p>
+            </div>
+
             <div class="feature-card clickable" id="smart-filter-card">
                 <span class="feature-icon">🎨</span>
                 <h3 class="feature-title">智能滤镜应用</h3>
                 <p class="feature-desc">基于图像分类自动为您的照片应用最适合的艺术滤镜，提升视觉效果</p>
             </div>
 
-        <div class="feature-card clickable" id="image-clarity-card">
-            <span class="feature-icon">🔧</span>
-            <h3 class="feature-title">图像清晰化</h3>
-            <p class="feature-desc">AI 处理使图像更清晰，包含人脸增强模块</p>
-        </div>
+            <div class="feature-card clickable" id="image-clarity-card">
+                <span class="feature-icon">🔧</span>
+                <h3 class="feature-title">图像清晰化</h3>
+                <p class="feature-desc">AI 处理使图像更清晰，包含人脸增强模块</p>
+            </div>
 
             <div class="feature-card clickable" id="background-replacement-card">
                 <span class="feature-icon">🎭</span>
@@ -514,6 +520,19 @@
             card.addEventListener('mouseleave', function() {
                 this.style.transform = 'translateY(0) scale(1)';
             });
+        });
+
+        document.getElementById('basic-function').addEventListener('click', function() {
+            // 添加点击动画效果
+            this.style.transform = 'translateY(-5px) scale(0.98)';
+            setTimeout(() => {
+                this.style.transform = 'translateY(-10px) scale(1.02)';
+            }, 150);
+
+            // 跳转到index.html页面
+            setTimeout(() => {
+                window.location.href = '/basic';
+            }, 300);
         });
 
         // Add click event for smart filter card

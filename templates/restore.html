@@ -248,20 +248,13 @@
 
     <header class="header">
         <a href="/" class="logo">Artifex AI</a>
-        <nav>
-            <ul class="nav">
-                <li><a href="#">产品</a></li>
-                <li><a href="#">特征</a></li>
-                <li><a href="#">资源</a></li>
-            </ul>
-        </nav>
     </header>
 
     <main class="main-content">
         <h1 class="hero-title">图像恢复（噪声滤除）</h1>
         
         <div class="page-container">
-            <a href="/" class="nav-btn">返回首页</a>
+            <a href="/basic" class="nav-btn">返回基本功能总览</a>
             
             <div class="control-panel">
                 <input type="file" id="imageInput" accept="image/*">
@@ -434,7 +427,7 @@
                     if (result.success) {
                         document.getElementById('resultImage').src = result.resultImage;
                     } else {
-                        alert(result.error || '处理失败');
+                        alert('处理失败');
                     }
                 } else {
                     alert('处理请求失败');

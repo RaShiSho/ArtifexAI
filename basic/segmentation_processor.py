@@ -143,33 +143,35 @@ class SegmentationProcessor:
             lines = cv2.HoughLines(edges, 1, np.pi/180, 200)
             result = img.copy()
             # print(lines)
-            for i_line in lines:
-                for line in i_line:
-                    rho = line[0]  # 第一个元素是距离rho
-                    theta = line[1]  # 第二个元素是角度theta
-                    if (theta < (np.pi / 4.)) or (theta > (3. * np.pi / 4.0)):  # 垂直直线
-                        # 该直线与第一行的交点
-                        pt1 = (int(rho / np.cos(theta)), 0)
-                        # 该直线与最后一行的焦点
-                        pt2 = (int((rho - result.shape[0] * np.sin(theta)) / np.cos(theta)), result.shape[0])
-                        # 绘制一条红线
-                        cv2.line(result, pt1, pt2, (0, 0, 255))
-                    else:  # 水平直线
-                        # 该直线与第一列的交点
-                        pt1 = (0, int(rho / np.sin(theta)))
-                        # 该直线与最后一列的交点
-                        pt2 = (result.shape[1], int((rho - result.shape[1] * np.cos(theta)) / np.sin(theta)))
-                        # 绘制一条直线
-                        cv2.line(result, pt1, pt2, (0, 0, 255), 1)
+            if lines is not None:
+                for i_line in lines:
+                    for line in i_line:
+                        rho = line[0]  # 第一个元素是距离rho
+                        theta = line[1]  # 第二个元素是角度theta
+                        if (theta < (np.pi / 4.)) or (theta > (3. * np.pi / 4.0)):  # 垂直直线
+                            # 该直线与第一行的交点
+                            pt1 = (int(rho / np.cos(theta)), 0)
+                            # 该直线与最后一行的焦点
+                            pt2 = (int((rho - result.shape[0] * np.sin(theta)) / np.cos(theta)), result.shape[0])
+                            # 绘制一条红线
+                            cv2.line(result, pt1, pt2, (0, 0, 255))
+                        else:  # 水平直线
+                            # 该直线与第一列的交点
+                            pt1 = (0, int(rho / np.sin(theta)))
+                            # 该直线与最后一列的交点
+                            pt2 = (result.shape[1], int((rho - result.shape[1] * np.cos(theta)) / np.sin(theta)))
+                            # 绘制一条直线
+                            cv2.line(result, pt1, pt2, (0, 0, 255), 1)
             # 经验参数
             minLineLength = 80
             maxLineGap = 15
             linesP = cv2.HoughLinesP(edges, 1, np.pi / 180, 80)
 
             result_P = img.copy()
-            for i_P in linesP:
-                for x1, y1, x2, y2 in i_P:
-                    cv2.line(result_P, (x1, y1), (x2, y2), (0, 255, 0), 3)
+            if linesP is not None:
+                for i_P in linesP:
+                    for x1, y1, x2, y2 in i_P:
+                        cv2.line(result_P, (x1, y1), (x2, y2), (0, 255, 0), 3)
 
             # 将结果图转为 Base64
             gray_image = SegmentationProcessor._image_to_base64(gray)

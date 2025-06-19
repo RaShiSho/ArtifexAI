@@ -8,11 +8,18 @@ import os
 import base64
 from io import BytesIO
 
-# 模型初始化（只加载一次）
-yolo = YOLOPersonDetector()
-clip_model = CLIPClassifier()
+isLoad = False
 
 def classify_uploaded_image(pil_image, filter_map):
+    global isLoad, yolo, clip_model
+
+    if not isLoad:
+        # 模型初始化（只加载一次）
+        yolo = YOLOPersonDetector()
+        clip_model = CLIPClassifier()
+        isLoad = True
+
+
     # 保存图像到临时文件
     temp = tempfile.NamedTemporaryFile(suffix=".jpg", delete=False)
     temp_path = temp.name

@@ -264,6 +264,14 @@ def api_replace_background():
         if file.filename == '':
             return jsonify({'error': 'No selected file'}), 400
 
+        # 验证主题是否有效
+        try:
+            available_styles = background_system.get_available_styles()
+            if theme not in available_styles:
+                return jsonify({'error': f'Invalid theme. Available themes: {available_styles}'}), 400
+        except Exception as e:
+            return jsonify({'error': f'Failed to get available styles: {str(e)}'}), 500
+
         # 保存上传图片
         filename = secure_filename(file.filename)
         input_path = os.path.join(UPLOAD_FOLDER, f"{uuid.uuid4().hex}_{filename}")
@@ -273,11 +281,13 @@ def api_replace_background():
         output_filename = f"bg_replaced_{os.path.basename(filename)}"
         output_path = os.path.join(RESULT_FOLDER, output_filename)
 
-        # 使用预先初始化的模型处理图片
+        # 使用背景替换系统处理图片
         background_system.process_image(
             input_path=input_path,
             output_path=output_path,
             background_style=theme,
+            enhance_edges=True,
+            feather_strength=3,
             quality='high'  # 默认为高质量以获得更好效果
         )
 
@@ -286,6 +296,16 @@ def api_replace_background():
     except Exception as e:
         traceback.print_exc()
         return jsonify({'error': f'Server error: {str(e)}'}), 500
+
+# 获取可用背景风格接口
+@app.route('/api/background-styles', methods=['GET'])
+def api_get_background_styles():
+    try:
+        styles = background_system.get_available_styles()
+        return jsonify({'styles': styles})
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({'error': f'Failed to get styles: {str(e)}'}), 500
 
 
 

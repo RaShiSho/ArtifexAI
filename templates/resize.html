@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>图像缩放与变换 - Artifex AI</title>
+    <style>
+        /* --- 基础和背景风格 (来自 home.html) --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e, #16213e, #0f0c29);
+            color: white;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+        .bg-animation {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0;
+        }
+        .floating-element {
+            position: absolute; background: linear-gradient(45deg, #8b5cf6, #a855f7, #3b82f6); border-radius: 10px; opacity: 0.1; animation: float 6s ease-in-out infinite;
+        }
+        .floating-element:nth-child(1) { width: 100px; height: 80px; top: 20%; left: 10%; animation-delay: 0s; }
+        .floating-element:nth-child(2) { width: 60px; height: 60px; top: 40%; right: 15%; animation-delay: 2s; }
+        .floating-element:nth-child(3) { width: 80px; height: 100px; bottom: 30%; left: 5%; animation-delay: 4s; }
+        .floating-element:nth-child(4) { width: 90px; height: 70px; bottom: 20%; right: 10%; animation-delay: 1s; }
+        @keyframes float { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-20px) rotate(5deg); } }
+        .particle { position: absolute; background: #8b5cf6; border-radius: 50%; pointer-events: none; opacity: 0.6; animation: particle-float 8s linear infinite; }
+        @keyframes particle-float { 0% { transform: translateY(100vh) scale(0); opacity: 0; } 10% { opacity: 0.6; } 90% { opacity: 0.6; } 100% { transform: translateY(-100px) scale(1); opacity: 0; } }
+
+        /* --- 头部风格 (来自 home.html) --- */
+        .header {
+            position: relative; z-index: 10; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; backdrop-filter: blur(10px); background: rgba(26, 26, 46, 0.3);
+        }
+        .logo { display: flex; align-items: center; font-size: 1.5rem; font-weight: bold; color: #8b5cf6; text-decoration: none; }
+        .logo::before { content: "🎨"; margin-right: 0.5rem; font-size: 1.8rem; }
+        .nav { display: flex; gap: 2rem; list-style: none; }
+        .nav a { color: rgba(255, 255, 255, 0.8); text-decoration: none; transition: color 0.3s ease; position: relative; }
+        .nav a:hover { color: #8b5cf6; }
+        .nav a::after { content: ''; position: absolute; bottom: -5px; left: 0; width: 0; height: 2px; background: #8b5cf6; transition: width 0.3s ease; }
+        .nav a:hover::after { width: 100%; }
+        
+        /* --- 主要内容区域风格 --- */
+        .main-content {
+            position: relative; z-index: 5; display: flex; flex-direction: column; align-items: center; text-align: center; padding: 2rem;
+        }
+        .hero-title {
+            font-size: 3rem; font-weight: 700; margin-bottom: 1rem; background: linear-gradient(45deg, #ffffff, #8b5cf6, #a855f7); background-size: 200% 200%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: gradientShift 3s ease-in-out infinite; line-height: 1.2;
+        }
+        @keyframes gradientShift { 0%, 100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+
+        /* --- 页面特定风格 --- */
+        .page-container {
+            width: 100%;
+            max-width: 1200px;
+            margin-top: 2rem;
+        }
+        
+        /* 控制面板卡片 */
+        .control-panel {
+            background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; padding: 2rem; backdrop-filter: blur(10px); margin-bottom: 2rem; text-align: left;
+        }
+        
+        .control-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .control-group h4 {
+            color: #8b5cf6;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 0.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        .form-group input[type="number"],
+        .form-group input[type="file"] {
+            width: 100%;
+            padding: 0.75rem;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: white;
+            font-size: 1rem;
+        }
+        
+        /* 文件上传按钮美化 */
+        input[type="file"]::file-selector-button {
+            background: linear-gradient(45deg, #8b5cf6, #a855f7);
+            border: none;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        input[type="file"]::file-selector-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(139, 92, 246, 0.3);
+        }
+
+        .actions {
+            text-align: center;
+            margin-top: 2rem;
+        }
+        
+        /* 按钮风格 */
+        .btn {
+            background: linear-gradient(45deg, #8b5cf6, #a855f7); border: none; color: white; padding: 0.8rem 2.5rem; border-radius: 30px; text-decoration: none; transition: all 0.3s ease; font-size: 1.1rem; cursor: pointer;
+        }
+        .btn:hover {
+            transform: translateY(-2px); box-shadow: 0 15px 30px rgba(139, 92, 246, 0.4);
+        }
+        .btn-secondary {
+            background: transparent; border: 1px solid #8b5cf6;
+        }
+
+        /* 图像显示区域 */
+        .image-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+        .image-box {
+            background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; padding: 1.5rem; backdrop-filter: blur(10px);
+        }
+        .image-box h3 {
+            color: #8b5cf6; margin-top: 0; margin-bottom: 1rem;
+        }
+        .preview {
+            max-width: 100%;
+            max-height: 500px;
+            display: block;
+            margin: 0 auto;
+            border-radius: 10px;
+            background-color: rgba(0,0,0,0.2);
+        }
+
+        @media (max-width: 768px) {
+            .nav { display: none; }
+            .hero-title { font-size: 2.5rem; }
+            .image-container { grid-template-columns: 1fr; }
+        }
+
+        .nav-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border-radius: 30px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            margin-bottom: 1.5rem;
+            display: inline-block;
+        }
+        .nav-btn:hover {
+            background: rgba(139, 92, 246, 0.3);
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-animation">
+        <div class="floating-element"></div>
+        <div class="floating-element"></div>
+        <div class="floating-element"></div>
+        <div class="floating-element"></div>
+    </div>
+
+    <header class="header">
+        <a href="/" class="logo">Artifex AI</a>
+        <nav>
+            <ul class="nav">
+                <li><a href="#">产品</a></li>
+                <li><a href="#">特征</a></li>
+                <li><a href="#">资源</a></li>
+                <li><a href="#">定价</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="main-content">
+        <h1 class="hero-title">图像缩放与变换</h1>
+
+        
+        <div class="page-container">
+            <a href="/" class="nav-btn">返回首页</a>
+
+            
+            <div class="control-panel">
+                <div class="form-group">
+                    <label for="imageInput">第一步：选择要处理的图片</label>
+                    <input type="file" id="imageInput" accept="image/*" onchange="previewOriginal()">
+                </div>
+                <div class="control-grid">
+                    <div class="control-group">
+                        <h4>平移调整</h4>
+                        <div class="form-group">
+                            <label for="tx">水平平移 (px)</label>
+                            <input type="number" id="tx" value="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="ty">垂直平移 (px)</label>
+                            <input type="number" id="ty" value="0">
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <h4>旋转调整</h4>
+                        <div class="form-group">
+                            <label for="angle">旋转角度 (°)</label>
+                            <input type="number" id="angle" value="0" min="-360" max="360">
+                        </div>
+                        <small>无法和平移同时操作</small>
+                    </div>
+                    <div class="control-group">
+                        <h4>尺寸调整</h4>
+                        <div class="form-group">
+                            <label for="width">宽度 (px)</label>
+                            <input type="number" id="width" value="800">
+                        </div>
+                        <div class="form-group">
+                            <label for="height">高度 (px)</label>
+                            <input type="number" id="height" value="600">
+                        </div>
+                    </div>
+                </div>
+                 <div class="actions">
+                    <button class="btn" onclick="processImage()">生成图像</button>
+                </div>
+            </div>
+
+            <div class="image-container">
+                <div class="image-box">
+                    <h3>原图</h3>
+                    <img id="originalPreview" class="preview">
+                </div>
+                <div class="image-box">
+                    <h3>处理后的图片</h3>
+                    <img id="preview" class="preview">
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // --- 原始 JS 功能，无需修改 ---
+        function previewOriginal() {
+            const imageInput = document.getElementById('imageInput');
+            const originalPreview = document.getElementById('originalPreview');
+            const widthInput = document.getElementById('width');
+            const heightInput = document.getElementById('height');
+            
+            if (imageInput.files && imageInput.files[0]) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    originalPreview.src = e.target.result;
+                    
+                    const img = new Image();
+                    img.onload = function() {
+                        widthInput.value = img.width;
+                        heightInput.value = img.height;
+                    }
+                    img.src = e.target.result;
+                }
+                
+                reader.readAsDataURL(imageInput.files[0]);
+            }
+        }
+
+        async function processImage() {
+            const imageInput = document.getElementById('imageInput');
+            const width = document.getElementById('width').value;
+            const height = document.getElementById('height').value;
+            const tx = document.getElementById('tx').value;
+            const ty = document.getElementById('ty').value;
+            const angle = document.getElementById('angle').value;
+            
+            if (!imageInput.files[0]) {
+                alert('请先选择图片');
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('image', imageInput.files[0]);
+            formData.append('width', width);
+            formData.append('height', height);
+            formData.append('tx', tx);
+            formData.append('ty', ty);
+            formData.append('angle', angle);
+            
+            try {
+                const response = await fetch('/resize', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    document.getElementById('preview').src = data.image;
+                } else {
+                    alert('处理失败：' + data.error);
+                }
+            } catch (error) {
+                alert('处理失败：' + error);
+            }
+        }
+
+        // --- 背景粒子效果 JS ---
+        function createParticle() {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = Math.random() * 100 + 'vw';
+            particle.style.width = particle.style.height = Math.random() * 4 + 2 + 'px';
+            particle.style.animationDuration = Math.random() * 6 + 4 + 's';
+            document.querySelector('.bg-animation').appendChild(particle);
+
+            setTimeout(() => {
+                particle.remove();
+            }, 8000);
+        }
+        setInterval(createParticle, 500);
+    </script>
+</body>
+</html>

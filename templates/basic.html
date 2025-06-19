@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>图像处理功能测试</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e, #16213e, #0f0c29);
+            color: white;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .floating-element {
+            position: absolute;
+            background: linear-gradient(45deg, #8b5cf6, #a855f7, #3b82f6);
+            border-radius: 10px;
+            opacity: 0.1;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .floating-element:nth-child(1) { width: 100px; height: 80px; top: 20%; left: 10%; animation-delay: 0s; }
+        .floating-element:nth-child(2) { width: 60px; height: 60px; top: 40%; right: 15%; animation-delay: 2s; }
+        .floating-element:nth-child(3) { width: 80px; height: 100px; bottom: 30%; left: 5%; animation-delay: 4s; }
+        .floating-element:nth-child(4) { width: 90px; height: 70px; bottom: 20%; right: 10%; animation-delay: 1s; }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(5deg); }
+        }
+
+        .header {
+            position: relative;
+            z-index: 10;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(10px);
+            background: rgba(26, 26, 46, 0.3);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #8b5cf6;
+        }
+
+        .logo::before {
+            content: "🎨";
+            margin-right: 0.5rem;
+            font-size: 1.8rem;
+        }
+
+        .nav { display: flex; gap: 2rem; list-style: none; }
+        .nav a { color: rgba(255, 255, 255, 0.8); text-decoration: none; transition: color 0.3s ease; position: relative; }
+        .nav a:hover { color: #8b5cf6; }
+        .nav a::after { content: ''; position: absolute; bottom: -5px; left: 0; width: 0; height: 2px; background: #8b5cf6; transition: width 0.3s ease; }
+        .nav a:hover::after { width: 100%; }
+
+        .auth-buttons { display: flex; gap: 1rem; }
+        .btn-secondary { background: transparent; border: 1px solid rgba(255, 255, 255, 0.3); color: white; padding: 0.5rem 1.5rem; border-radius: 25px; text-decoration: none; transition: all 0.3s ease; }
+        .btn-secondary:hover { background: rgba(255, 255, 255, 0.1); border-color: #8b5cf6; }
+
+        .main-content {
+            position: relative;
+            z-index: 5;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding: 4rem 2rem;
+            min-height: 80vh;
+            justify-content: center;
+        }
+
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(45deg, #ffffff, #8b5cf6, #a855f7);
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradientShift 3s ease-in-out infinite;
+            line-height: 1.2;
+        }
+        
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .hero-subtitle {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 3rem;
+            max-width: 600px;
+            line-height: 1.6;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            text-decoration: none;
+            display: block;
+            color: white;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            background: rgba(255, 255, 255, 0.08);
+            border-color: #8b5cf6;
+            box-shadow: 0 20px 40px rgba(139, 92, 246, 0.2);
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            display: block;
+            line-height: 1;
+        }
+
+        .feature-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #8b5cf6;
+        }
+
+        @media (max-width: 768px) {
+            .nav { display: none; }
+            .hero-title { font-size: 2.5rem; }
+            .features-grid { grid-template-columns: 1fr; }
+            .header { padding: 1rem; }
+        }
+        
+        .particle { position: absolute; background: #8b5cf6; border-radius: 50%; pointer-events: none; opacity: 0.6; animation: particle-float 8s linear infinite; }
+        @keyframes particle-float {
+            0% { transform: translateY(100vh) scale(0); opacity: 0; }
+            10% { opacity: 0.6; }
+            90% { opacity: 0.6; }
+            100% { transform: translateY(-100px) scale(1); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo">Artifex AI</div>
+        <nav>
+            <ul class="nav">
+                <li><a href="#">产品</a></li>
+                <li><a href="#">特征</a></li>
+                <li><a href="#">资源</a></li>
+                <li><a href="#">定价</a></li>
+            </ul>
+        </nav>
+        <div class="auth-buttons">
+            <a href="#" class="btn-secondary">登录</a>
+        </div>
+    </header>
+    
+    <main class="main-content">
+        <h1 class="hero-title">图像处理功能测试</h1>
+        <p class="hero-subtitle">
+            探索我们先进的图像处理工具套件。点击下面的任何功能进行测试和体验。
+        </p>
+        
+        <div class="features-grid">
+            <a href="/resize" class="feature-card">
+                <span class="feature-icon">📏</span>
+                <h3 class="feature-title">图像缩放</h3>
+            </a>
+            <a href="/colorspace" class="feature-card">
+                <span class="feature-icon">🎨</span>
+                <h3 class="feature-title">色彩空间分析</h3>
+            </a>
+            <a href="/arithmetic" class="feature-card">
+                <span class="feature-icon">➕</span>
+                <h3 class="feature-title">图像算术运算</h3>
+            </a>
+            <a href="/logtrans" class="feature-card">
+                <span class="feature-icon">🪵</span>
+                <h3 class="feature-title">对数变换</h3>
+            </a>
+            <a href="/histogram" class="feature-card">
+                <span class="feature-icon">📊</span>
+                <h3 class="feature-title">图像直方图操作</h3>
+            </a>
+            <a href="/segmentation" class="feature-card">
+                <span class="feature-icon">✂️</span>
+                <h3 class="feature-title">图像分割</h3>
+            </a>
+            <a href="/smooth" class="feature-card">
+                <span class="feature-icon">🧼</span>
+                <h3 class="feature-title">图像平滑</h3>
+            </a>
+            <a href="/sharpen" class="feature-card">
+                <span class="feature-icon">✨</span>
+                <h3 class="feature-title">图像锐化</h3>
+            </a>
+            <a href="/morphology" class="feature-card">
+                <span class="feature-icon">🔬</span>
+                <h3 class="feature-title">数学形态学</h3>
+            </a>
+            <a href="/restore" class="feature-card">
+                <span class="feature-icon">🔧</span>
+                <h3 class="feature-title">图像恢复</h3>
+            </a>
+            <a href="/wavelettrans" class="feature-card">
+                <span class="feature-icon">〰️</span>
+                <h3 class="feature-title">小波变换</h3>
+            </a>
+        </div>
+    </main>
+    
+    <script>
+        // Create floating particles
+        function createParticle() {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = Math.random() * 100 + 'vw';
+            particle.style.width = particle.style.height = Math.random() * 4 + 2 + 'px';
+            particle.style.animationDuration = Math.random() * 6 + 4 + 's';
+            document.querySelector('.bg-animation').appendChild(particle);
+    
+            setTimeout(() => {
+                particle.remove();
+            }, 8000);
+        }
+        setInterval(createParticle, 500);
+    </script>
+</body>
+</html>

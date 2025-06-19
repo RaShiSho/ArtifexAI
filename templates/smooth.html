@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>图像平滑 - Artifex AI</title>
+    <style>
+        /* --- 基础和背景风格 (来自 home.html) --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e, #16213e, #0f0c29);
+            color: white;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+        .bg-animation {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0;
+        }
+        .floating-element {
+            position: absolute; background: linear-gradient(45deg, #8b5cf6, #a855f7, #3b82f6); border-radius: 10px; opacity: 0.1; animation: float 6s ease-in-out infinite;
+        }
+        .floating-element:nth-child(1) { width: 100px; height: 80px; top: 20%; left: 10%; animation-delay: 0s; }
+        .floating-element:nth-child(2) { width: 60px; height: 60px; top: 40%; right: 15%; animation-delay: 2s; }
+        .floating-element:nth-child(3) { width: 80px; height: 100px; bottom: 30%; left: 5%; animation-delay: 4s; }
+        .floating-element:nth-child(4) { width: 90px; height: 70px; bottom: 20%; right: 10%; animation-delay: 1s; }
+        @keyframes float { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-20px) rotate(5deg); } }
+        .particle { position: absolute; background: #8b5cf6; border-radius: 50%; pointer-events: none; opacity: 0.6; animation: particle-float 8s linear infinite; }
+        @keyframes particle-float { 0% { transform: translateY(100vh) scale(0); opacity: 0; } 10% { opacity: 0.6; } 90% { opacity: 0.6; } 100% { transform: translateY(-100px) scale(1); opacity: 0; } }
+
+        /* --- 头部风格 (来自 home.html) --- */
+        .header {
+            position: relative; z-index: 10; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; backdrop-filter: blur(10px); background: rgba(26, 26, 46, 0.3);
+        }
+        .logo { display: flex; align-items: center; font-size: 1.5rem; font-weight: bold; color: #8b5cf6; text-decoration: none; }
+        .logo::before { content: "🎨"; margin-right: 0.5rem; font-size: 1.8rem; }
+        .nav { display: flex; gap: 2rem; list-style: none; }
+        .nav a { color: rgba(255, 255, 255, 0.8); text-decoration: none; transition: color 0.3s ease; position: relative; }
+        .nav a:hover { color: #8b5cf6; }
+
+        /* --- 主要内容区域风格 --- */
+        .main-content {
+            position: relative; z-index: 5; display: flex; flex-direction: column; align-items: center; text-align: center; padding: 2rem;
+        }
+        .hero-title {
+            font-size: 3rem; font-weight: 700; margin-bottom: 1rem; background: linear-gradient(45deg, #ffffff, #8b5cf6, #a855f7); background-size: 200% 200%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: gradientShift 3s ease-in-out infinite; line-height: 1.2;
+        }
+        @keyframes gradientShift { 0%, 100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+
+        /* --- 页面特定风格 --- */
+        .page-container {
+            width: 100%;
+            max-width: 1200px;
+            margin-top: 2rem;
+        }
+
+        /* 导航按钮 */
+        .nav-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border-radius: 30px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            margin-bottom: 1.5rem;
+            display: inline-block;
+        }
+        .nav-btn:hover {
+            background: rgba(139, 92, 246, 0.3);
+            transform: translateY(-2px);
+        }
+
+        /* 操作面板卡片 */
+        .control-panel {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+            margin-bottom: 2rem;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 1.5rem;
+        }
+        
+        /* 文件上传按钮美化 */
+        input[type="file"] {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: white;
+        }
+        input[type="file"]::file-selector-button {
+            background: linear-gradient(45deg, #8b5cf6, #a855f7);
+            border: none;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-right: 1rem;
+        }
+        input[type="file"]::file-selector-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(139, 92, 246, 0.3);
+        }
+
+        /* 按钮风格 */
+        .btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid #8b5cf6;
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border-radius: 30px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+        .btn:hover {
+            background: rgba(139, 92, 246, 0.3);
+            transform: translateY(-2px);
+        }
+
+        /* 下拉选择框样式 */
+        .selector {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: white;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            height: auto;
+        }
+
+        /* 结果显示区域 */
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            width: 100%;
+        }
+        .image-box {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 1.5rem;
+            backdrop-filter: blur(10px);
+        }
+        .image-box h3 {
+            color: #8b5cf6;
+            margin-top: 0;
+            margin-bottom: 1rem;
+        }
+        .image-box img {
+            max-width: 100%;
+            max-height: 400px;
+            display: block;
+            margin: 0 auto;
+            border-radius: 10px;
+            background-color: rgba(0,0,0,0.2);
+        }
+        
+        /* 平滑结果部分 */
+        .section {
+            margin-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 2rem;
+            width: 100%;
+        }
+        .section h2 {
+            color: #a855f7;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+        
+        /* 控制组 */
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        /* 加载指示器 */
+        .loader {
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top: 4px solid #8b5cf6;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            display: none;
+            margin-left: 10px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @media (max-width: 768px) {
+            .nav { display: none; }
+            .hero-title { font-size: 2.5rem; }
+            .control-panel {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .control-group {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-animation">
+        <div class="floating-element"></div>
+        <div class="floating-element"></div>
+        <div class="floating-element"></div>
+        <div class="floating-element"></div>
+    </div>
+
+    <header class="header">
+        <a href="/" class="logo">Artifex AI</a>
+        <nav>
+            <ul class="nav">
+                <li><a href="#">产品</a></li>
+                <li><a href="#">特征</a></li>
+                <li><a href="#">资源</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="main-content">
+        <h1 class="hero-title">图像平滑操作</h1>
+        
+        <div class="page-container">
+            <a href="/" class="nav-btn">返回首页</a>
+            
+            <div class="control-panel">
+                <input type="file" id="imageInput" accept="image/*">
+                
+                <div class="control-group">
+                    <button class="btn" onclick="frequencySmoothing()">频域平滑</button>
+                    <label>低通滤波器：</label>
+                    <select id="frequencyFilterSelect" class="selector">
+                        <option value="ideal">理想低通滤波</option>
+                        <option value="butterworth">巴特沃斯滤波</option>
+                        <option value="gauss">高斯滤波</option>
+                    </select>
+                </div>
+                
+                <div class="control-group">
+                    <button class="btn" onclick="spatialSmoothing()">空域平滑</button>
+                    <label>滤波法：</label>
+                    <select id="spatialFilterSelect" class="selector">
+                        <option value="mean">邻域平均法</option>
+                        <option value="median3">中值滤波法(3*3)</option>
+                        <option value="median5">中值滤波法(5*5)</option>
+                    </select>
+                </div>
+                
+                <div id="loadingIndicator" class="loader"></div>
+            </div>
+
+            <div class="image-grid">
+                <div class="image-box">
+                    <h3>原图</h3>
+                    <img id="originalImage">
+                </div>
+            </div>
+
+            <div class="section" id="frequencySmoothSection" style="display: none;">
+                <h2>频域平滑结果</h2>
+                <div class="image-grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));">
+                    <div class="image-box">
+                        <h3>频域图</h3>
+                        <img id="frequencyDomainImage">
+                    </div>
+                    <div class="image-box">
+                        <h3>滤波器图</h3>
+                        <img id="frequencyFilterImage">
+                    </div>
+                    <div class="image-box">
+                        <h3>处理结果图</h3>
+                        <img id="frequencyResultImage">
+                    </div>
+                </div>
+            </div>
+
+            <div class="section" id="spatialSmoothSection" style="display: none;">
+                <h2>空域平滑结果</h2>
+                <div class="image-grid">
+                    <div class="image-box">
+                        <h3>处理结果图</h3>
+                        <img id="spatialResultImage">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let currentImage = null;
+
+        document.getElementById('imageInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('originalImage').src = e.target.result;
+                    currentImage = file;
+                    // 隐藏所有结果部分
+                    document.getElementById('frequencySmoothSection').style.display = 'none';
+                    document.getElementById('spatialSmoothSection').style.display = 'none';
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        async function frequencySmoothing() {
+            if (!currentImage) {
+                alert('请先选择图片');
+                return;
+            }
+
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            loadingIndicator.style.display = 'inline-block';
+
+            const formData = new FormData();
+            formData.append('image', currentImage);
+            formData.append('filter', document.getElementById('frequencyFilterSelect').value);
+
+            try {
+                const response = await fetch('/frequency_smoothing', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    if (result.success) {
+                        document.getElementById('frequencySmoothSection').style.display = 'block';
+                        document.getElementById('spatialSmoothSection').style.display = 'none';
+
+                        document.getElementById('frequencyResultImage').src = result.resultImage;
+                        document.getElementById('frequencyFilterImage').src = result.filterImage;
+                        document.getElementById('frequencyDomainImage').src = result.frequencyImage;
+                        
+                        document.getElementById('frequencySmoothSection').scrollIntoView({ behavior: 'smooth' });
+                    } else {
+                        alert(result.error || '处理失败');
+                    }
+                } else {
+                    alert('处理请求失败');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('处理过程中发生错误');
+            } finally {
+                loadingIndicator.style.display = 'none';
+            }
+        }
+
+        async function spatialSmoothing() {
+            if (!currentImage) {
+                alert('请先选择图片');
+                return;
+            }
+
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            loadingIndicator.style.display = 'inline-block';
+
+            const formData = new FormData();
+            formData.append('image', currentImage);
+            formData.append('filter', document.getElementById('spatialFilterSelect').value);
+
+            try {
+                const response = await fetch('/spatial_smoothing', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    if (result.success) {
+                        document.getElementById('spatialSmoothSection').style.display = 'block';
+                        document.getElementById('frequencySmoothSection').style.display = 'none';
+
+                        document.getElementById('spatialResultImage').src = result.resultImage;
+                        
+                        document.getElementById('spatialSmoothSection').scrollIntoView({ behavior: 'smooth' });
+                    } else {
+                        alert(result.error || '处理失败');
+                    }
+                } else {
+                    alert('处理请求失败');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('处理过程中发生错误');
+            } finally {
+                loadingIndicator.style.display = 'none';
+            }
+        }
+        
+        // --- 背景粒子效果 JS ---
+        function createParticle() {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = Math.random() * 100 + 'vw';
+            particle.style.width = particle.style.height = Math.random() * 4 + 2 + 'px';
+            particle.style.animationDuration = Math.random() * 6 + 4 + 's';
+            document.querySelector('.bg-animation').appendChild(particle);
+
+            setTimeout(() => {
+                particle.remove();
+            }, 8000);
+        }
+        setInterval(createParticle, 500);
+    </script>
+</body>
+</html>

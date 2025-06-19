@@ -326,6 +326,35 @@
             }, 8000);
         }
         setInterval(createParticle, 500);
+
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fadeIn {
+                from { opacity: 0; transform: scale(0.95); }
+                to { opacity: 1; transform: scale(1); }
+            }
+            
+            .features-grid {
+                animation: fadeIn 0.8s ease-out forwards;
+            }
+        `;
+        document.head.appendChild(style);
+
+        // 可选：添加卡片逐个显示效果
+        document.addEventListener('DOMContentLoaded', () => {
+            const cards = document.querySelectorAll('.control-panel');
+            cards.forEach((card, index) => {
+                card.style.animation = `fadeIn 0.5s ease-out ${index * 0.1}s forwards`;
+                card.style.opacity = '0';
+            });
+        });
+        document.addEventListener('DOMContentLoaded', () => {
+            const cards = document.querySelectorAll('.image-container');
+            cards.forEach((card, index) => {
+                card.style.animation = `fadeIn 0.5s ease-out ${index * 0.1}s forwards`;
+                card.style.opacity = '0';
+            });
+        });
     </script>
 </body>
 </html>

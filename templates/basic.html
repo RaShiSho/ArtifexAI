@@ -64,6 +64,7 @@
             font-size: 1.5rem;
             font-weight: bold;
             color: #8b5cf6;
+            text-decoration: none;
         }
 
         .logo::before {
@@ -71,12 +72,6 @@
             margin-right: 0.5rem;
             font-size: 1.8rem;
         }
-
-        .nav { display: flex; gap: 2rem; list-style: none; }
-        .nav a { color: rgba(255, 255, 255, 0.8); text-decoration: none; transition: color 0.3s ease; position: relative; }
-        .nav a:hover { color: #8b5cf6; }
-        .nav a::after { content: ''; position: absolute; bottom: -5px; left: 0; width: 0; height: 2px; background: #8b5cf6; transition: width 0.3s ease; }
-        .nav a:hover::after { width: 100%; }
 
         .auth-buttons { display: flex; gap: 1rem; }
         .btn-secondary { background: transparent; border: 1px solid rgba(255, 255, 255, 0.3); color: white; padding: 0.5rem 1.5rem; border-radius: 25px; text-decoration: none; transition: all 0.3s ease; }
@@ -132,26 +127,42 @@
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 20px;
             padding: 2rem;
-            text-align: center;
-            transition: all 0.3s ease;
             backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
             text-decoration: none;
-            display: block;
-            color: white;
         }
 
         .feature-card:hover {
-            transform: translateY(-10px);
             background: rgba(255, 255, 255, 0.08);
             border-color: #8b5cf6;
-            box-shadow: 0 20px 40px rgba(139, 92, 246, 0.2);
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(139, 92, 246, 0.3);
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent, rgba(139, 92, 246, 0.1), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.6s ease;
+        }
+
+        .feature-card:hover::before {
+            transform: translateX(100%);
         }
 
         .feature-icon {
             font-size: 3rem;
             margin-bottom: 1rem;
             display: block;
-            line-height: 1;
+            transition: all 0.3s ease;
+            animation: bounce 2s ease-in-out infinite;
         }
 
         .feature-title {
@@ -174,6 +185,22 @@
             90% { opacity: 0.6; }
             100% { transform: translateY(-100px) scale(1); opacity: 0; }
         }
+
+        .back-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 0.5rem 1.5rem;
+            border-radius: 25px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
     </style>
 </head>
 <body>
@@ -187,11 +214,12 @@
 
 
     <header class="header">
-        <div class="logo">Artifex AI</div>
+        <a href="/" class="logo">Artifex AI</a>
+        <a href="/" class="back-btn">← 返回首页</a>
     </header>
     
     <main class="main-content">
-        <h1 class="hero-title">图像处理功能测试</h1>
+        <h1 class="hero-title">基本图像处理功能</h1>
         <p class="hero-subtitle">
             探索我们先进的图像处理工具套件。点击下面的任何功能进行测试和体验。
         </p>
@@ -259,6 +287,28 @@
             }, 8000);
         }
         setInterval(createParticle, 500);
+
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fadeIn {
+                from { opacity: 0; transform: scale(0.95); }
+                to { opacity: 1; transform: scale(1); }
+            }
+            
+            .features-grid {
+                animation: fadeIn 0.8s ease-out forwards;
+            }
+        `;
+        document.head.appendChild(style);
+
+        // 可选：添加卡片逐个显示效果
+        document.addEventListener('DOMContentLoaded', () => {
+            const cards = document.querySelectorAll('.feature-card');
+            cards.forEach((card, index) => {
+                card.style.animation = `fadeIn 0.5s ease-out ${index * 0.1}s forwards`;
+                card.style.opacity = '0';
+            });
+        });
     </script>
 </body>
 </html>

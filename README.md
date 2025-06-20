@@ -35,6 +35,7 @@ ArtifexAI 提供了以下核心功能：
     ```
 
 3.  **安装依赖**：
+
     **大部分依赖**:
 	```bash
     uv pip install -r requirements.txt
@@ -51,6 +52,7 @@ ArtifexAI 提供了以下核心功能：
 	```
 
 4. **部分包文件修改**
+
 	由于我们使用的库的版本更新问题，我们需要手动修改库中的文件
 	定位到 `ArtifexAI\.venv\Lib\site-packages\basicsr\data\degradations.py` 文件下
 	将第 8 行的

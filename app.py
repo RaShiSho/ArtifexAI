@@ -81,7 +81,6 @@ def clarity_page():
 def background_page():
     return render_template("background.html")
 
-
 @app.route('/basic')
 def basic_page():
     return render_template('basic.html')

@@ -8,11 +8,12 @@ ArtifexAI 是一个基于 Flask 框架构建的智能图像处理平台，旨在
 
 ArtifexAI 提供了以下核心功能：
 
+*   **基础图像处理**：包含图像缩放、色彩空间转换、算术运算、对数变换、直方图处理（均衡化、归一化）、图像分割（边缘检测）、图像平滑与锐化、形态学处理以及图像恢复等传统图像处理功能。
 *   **美颜与人脸增强**：利用先进的算法对人脸进行美化，包括磨皮、肤色调整、面部特征优化等，并能对人脸细节进行超分辨率增强。
 *   **智能背景替换**：通过精确的图像分割技术，实现人像与背景的分离，并支持智能生成或替换为多种风格的背景（如自然、城市、抽象、奇幻、太空、复古等）。
 *   **超分辨率增强**：应用深度学习模型（如 Real-ESRGAN）提升图像分辨率，恢复图像细节，使低分辨率图像变得清晰。
 *   **图像内容分类与滤镜应用**：结合 CLIP 和 YOLOv5 等模型，智能识别图像内容，并根据内容自动推荐或应用合适的图像滤镜。
-*   **基础图像处理**：包含图像缩放、色彩空间转换、算术运算、对数变换、直方图处理（均衡化、归一化）、图像分割（边缘检测）、图像平滑与锐化、形态学处理以及图像恢复等传统图像处理功能。
+
 
 ## 部署方式
 
@@ -34,7 +35,6 @@ ArtifexAI 提供了以下核心功能：
     ```
 
 3.  **安装依赖**：
-
     **大部分依赖**:
 	```bash
     uv pip install -r requirements.txt
@@ -64,8 +64,21 @@ ArtifexAI 提供了以下核心功能：
 	
 
 5.  **模型下载**：
-    *   本项目中的部分模型（如 Stable Diffusion、DeepLabV3）会在首次运行时自动下载到您的本地缓存目录（通常是 `~/.cache/huggingface/hub/` 和 `~/.cache/torch/hub/checkpoints/`）。请确保您的网络连接正常。
-    *   如果您遇到 `clip` 库的 `AttributeError: module 'clip' has no attribute 'load'` 错误，请尝试重新安装 `clip` 库：`pip install --upgrade clip` 或 `pip install git+https://github.com/openai/CLIP.git`。
+    * 本项目中的部分模型（如 Stable Diffusion、YOLOv5）会在首次运行时自动下载到您的本地缓存目录（通常是 `~/.cache/huggingface/hub/` 和 `~/.cache/torch/hub/checkpoints/`）。请确保您的网络连接正常。
+	    * 如有必要可以将 `app.py` 第10、11行配置为你的代理端口以加速模型的下载
+	    ```python
+	    os.environ["HTTP_PROXY"] = "http://127.0.0.1:10809"
+		os.environ["HTTPS_PROXY"] = "http://127.0.0.1:10809"
+		```
+    * 其他需要的模型权重文件需要您下载并保存在本地，路径分别为 `ArtifexAI\clarity\models\` 和 `ArtifexAI\gfpgan\weights\` 
+	    * 下载地址分别为
+	    * 需要放在`ArtifexAI\clarity\models\` 中的模型：
+		    * [Real-ESRGAN/docs/model_zoo.md at master · xinntao/Real-ESRGAN](https://github.com/xinntao/Real-ESRGAN/blob/master/docs/model_zoo.md)，下载RealESRGAN_x4plus.pth
+		    * [TencentARC/GFPGAN: GFPGAN aims at developing Practical Algorithms for Real-world Face Restoration.](https://github.com/TencentARC/GFPGAN?tab=readme-ov-file)，下载GFPGANv1.4.pth
+	    * 需要放在`ArtifexAI\gfpgan\weights\`  中的模型：
+		    * https://github.com/xinntao/facexlib/releases/download/v0.1.0/detection_Resnet50_Final.pth 这会自动下载
+		    * https://github.com/xinntao/facexlib/releases/download/v0.2.2/parsing_parsenet.pth 这会自动下载
+	* 本项目使用的开源模型的链接也在以上下载链接中给出，您可访问原项目来了解这些模型的使用方法
 
 ## 运行项目
 

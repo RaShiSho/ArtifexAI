@@ -4,39 +4,53 @@ import numpy as np
 
 def pil_to_cv(image):
     return cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
-
+    # 将PIL图像转换为OpenCV格式(BGR)
 def cv_to_pil(image):
     return Image.fromarray(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
-
+    # 将OpenCV图像转换为PIL格式(RGB)
 def apply_named_filter(image, filter_name):
+    """
+        应用指定的滤镜效果
+        参数:
+            image: PIL图像对象
+            filter_name: 滤镜名称字符串
+        返回:
+            应用滤镜后的PIL图像对象
+    """
     if filter_name == 'none':
         return image
 
     elif filter_name == 'sharpen':
+        # 锐化效果
         return image.filter(ImageFilter.SHARPEN)
 
     elif filter_name == 'bright':
+        # 提亮效果
         enhancer = ImageEnhance.Brightness(image)
         return enhancer.enhance(1.5)
 
     elif filter_name == 'smooth_skin':
+        # 双边滤波(保边磨皮)
         cv_img = pil_to_cv(image)
         result = cv2.bilateralFilter(cv_img, d=9, sigmaColor=75, sigmaSpace=75)
         return cv_to_pil(result)
 
     elif filter_name == 'glow':
+        # 柔光效果
         cv_img = pil_to_cv(image)
         blur = cv2.GaussianBlur(cv_img, (0, 0), sigmaX=15)
         glow = cv2.addWeighted(cv_img, 0.7, blur, 0.6, 0)
         return cv_to_pil(glow)
 
     elif filter_name == 'warm':
+        # 暖色调
         r, g, b = image.split()
         r = r.point(lambda i: min(i + 30, 255))
         b = b.point(lambda i: max(i - 20, 0))
         return Image.merge('RGB', (r, g, b))
 
     elif filter_name == 'cold':
+        # 冷色调
         r, g, b = image.split()
         b = b.point(lambda i: min(i + 30, 255))
         r = r.point(lambda i: max(i - 20, 0))
@@ -44,6 +58,7 @@ def apply_named_filter(image, filter_name):
 
 
     elif filter_name == 'pencil':
+        # 铅笔画效果
         cv_img = pil_to_cv(image)
         dst_gray, _ = cv2.pencilSketch(cv_img, sigma_s=60, sigma_r=0.07, shade_factor=0.05)
         return cv_to_pil(dst_gray)
@@ -118,7 +133,6 @@ def apply_named_filter(image, filter_name):
         g = g.point(lambda i: max(i - 5, 0))
         b = b.point(lambda i: max(i - 10, 0))
         return Image.merge("RGB", (r, g, b))
-
 
     else:
         return image

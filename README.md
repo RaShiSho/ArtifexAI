@@ -135,5 +135,14 @@ ArtifexAI 采用模块化设计，主要结构如下：
     在您的浏览器中打开 `http://127.0.0.1:5000` 即可访问 ArtifexAI 平台。
 
 
-## 引用代码/模型来源
-
+## 引用模型来源
+-  **Real-ESRGAN**
+	- 地址：[https://github.com/xinntao/Real-ESRGAN](https://github.com/xinntao/Real-ESRGAN)
+	- 论文：[Real-ESRGAN: Training Real-World Blind Super-Resolution with Pure Synthetic Data](https://arxiv.org/abs/2107.10833)
+-  **Stable Diffusion**
+	- 地址：[https://github.com/CompVis/stable-diffusion](https://github.com/CompVis/stable-diffusion)
+-  **GFPGAN**
+	- 地址：[TencentARC/GFPGAN: GFPGAN aims at developing Practical Algorithms for Real-world Face Restoration.](https://github.com/TencentARC/GFPGAN)
+	- 论文：[GFPGAN: Towards Real-World Blind Face Restoration with Generative Facial Prior](https://arxiv.org/abs/2101.04061)
+- **YOLOv5**
+	- 地址：[ultralytics/yolov5：PyTorch > ONNX 中的 YOLOv5 🚀 > CoreML > TFLite --- ultralytics/yolov5: YOLOv5 🚀 in PyTorch > ONNX > CoreML > TFLite](https://github.com/ultralytics/yolov5)

@@ -8,22 +8,30 @@ class BackgroundReplacementSystem:
     """集成的背景替换系统"""
 
     def __init__(self, device='cuda' if torch.cuda.is_available() else 'cpu'):
+        """
+                初始化背景替换系统
+                参数:
+                    device: 计算设备 ('cuda' 或 'cpu')
+        """
         self.device = device
         print(f"Using device: {self.device}")
 
         # 初始化模块，支持模型懒加载
-        self.segmentation_model = None
-        self.background_generator = None
-        self.image_processor = None
-        self._models_loaded = False
+        self.segmentation_model = None  # 对象分割模型
+        self.background_generator = None  # 背景生成器
+        self.image_processor = None  # 图像处理器
+        self._models_loaded = False  # 模型加载状态标志
 
     def _ensure_models_loaded(self):
         """确保模型已加载，支持懒加载"""
         if not self._models_loaded:
             print("Loading background replacement models...")
             try:
+                # 1. 初始化分割模型
                 self.segmentation_model = SegmentationModel(device=self.device)
+                # 2. 初始化背景生成器
                 self.background_generator = EnhancedBackgroundGenerator(device=self.device)
+                # 3. 初始化图像处理器
                 self.image_processor = ImageProcessor()
                 self._models_loaded = True
                 print("Background replacement models loaded successfully!")
@@ -34,15 +42,13 @@ class BackgroundReplacementSystem:
     def process_image(self, input_path, output_path, background_style='nature',
                       enhance_edges=True, feather_strength=3, quality='medium'):
         """
-        处理单张图片：分割 + 背景替换
-
-        Args:
-            input_path: 输入图片路径
-            output_path: 输出图片路径
-            background_style: 背景风格 ('nature', 'urban', 'abstract', 'fantasy', 'space', 'vintage')
-            enhance_edges: 是否增强边缘
-            feather_strength: 羽化强度 (1-5)
-            quality: 生成质量 ('low', 'medium', 'high')
+             参数:
+                 input_path: 输入图片路径
+                 output_path: 输出图片路径
+                 background_style: 背景风格 ('nature','urban'等)
+                 enhance_edges: 是否增强边缘融合效果
+                 feather_strength: 边缘羽化强度(1-5)
+                 quality: 生成质量('low','medium','high')
         """
         try:
             # 确保模型已加载

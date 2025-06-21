@@ -1,13 +1,22 @@
 import cv2
 import numpy as np
 
-
 class SkinEnhancer:
+    """
+    皮肤增强处理器
+    提供肤色检测、肤色均衡、磨皮和美白的皮肤增强功能
+    """
     def __init__(self):
         pass
 
     def detect_skin_mask(self, image):
-        """检测皮肤区域"""
+        """
+        检测皮肤区域并生成掩码
+        参数:
+            image: 输入BGR图像
+        返回:
+            numpy.ndarray: 皮肤区域二值掩码(0-255)
+        """
         # 转换到HSV色彩空间
         hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
 
@@ -23,13 +32,22 @@ class SkinEnhancer:
         mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
         mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel)
 
-        # 高斯模糊平滑边缘
+        # 高斯模糊平滑掩码边缘(使过渡更自然)
         mask = cv2.GaussianBlur(mask, (3, 3), 1)
 
         return mask
 
     def balance_skin_tone(self, image, intensity=0.3):
-        """肤色均衡处理"""
+        """
+        肤色均衡处理 - 减少红色调并提亮肤色
+
+        参数:
+            image: 输入BGR图像
+            intensity: 调节强度(0-1)
+
+        返回:
+            numpy.ndarray: 处理后的BGR图像
+        """
         # 获取皮肤掩码
         skin_mask = self.detect_skin_mask(image)
 
@@ -53,7 +71,16 @@ class SkinEnhancer:
         return result
 
     def skin_smoothing(self, image, intensity=0.8):
-        """磨皮滤波处理"""
+        """
+               磨皮处理 - 平滑皮肤纹理同时保留边缘细节
+
+               参数:
+                   image: 输入BGR图像
+                   intensity: 磨皮强度(0-1)
+
+               返回:
+                   numpy.ndarray: 处理后的BGR图像
+        """
         # 获取皮肤掩码
         skin_mask = self.detect_skin_mask(image)
 
@@ -75,7 +102,15 @@ class SkinEnhancer:
         return result.astype(np.uint8)
 
     def enhance_skin_brightness(self, image, brightness=1.1, contrast=1.05):
-        """提升皮肤亮度和对比度"""
+        """
+                皮肤美白 - 提升皮肤区域亮度和对比度
+                参数:
+                    image: 输入BGR图像
+                    brightness: 亮度增强系数(>1)
+                    contrast: 对比度增强系数(>1)
+                返回:
+                    numpy.ndarray: 处理后的BGR图像
+        """
         skin_mask = self.detect_skin_mask(image)
 
         # 转换到HSV

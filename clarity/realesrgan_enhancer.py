@@ -1,4 +1,7 @@
-#!/usr/bin/env python3
+"""
+Real-ESRGAN 图像超分辨率增强实现
+包含网络结构和图像处理流程
+"""
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -6,15 +9,21 @@ import cv2
 import numpy as np
 
 class RRDBBlock(nn.Module):
-    """Residual in Residual Dense Block"""
-
+    """残差中的残差密集块 (Residual in Residual Dense Block)"""
     def __init__(self, num_feat=64, num_grow_ch=32):
+        """
+               初始化RRDB块
+               参数:
+                   num_feat: 特征图通道数
+                   num_grow_ch: 每层增长通道数
+        """
         super(RRDBBlock, self).__init__()
         self.rdb1 = ResidualDenseBlock(num_feat, num_grow_ch)
         self.rdb2 = ResidualDenseBlock(num_feat, num_grow_ch)
         self.rdb3 = ResidualDenseBlock(num_feat, num_grow_ch)
 
     def forward(self, x):
+        """前向传播"""
         out = self.rdb1(x)
         out = self.rdb2(out)
         out = self.rdb3(out)
@@ -22,10 +31,16 @@ class RRDBBlock(nn.Module):
 
 
 class ResidualDenseBlock(nn.Module):
-    """Residual Dense Block"""
-
+    """残差密集块 (Residual Dense Block)"""
     def __init__(self, num_feat=64, num_grow_ch=32):
+        """
+               初始化RDB块
+               参数:
+                   num_feat: 特征图通道数
+                   num_grow_ch: 每层增长通道数
+        """
         super(ResidualDenseBlock, self).__init__()
+        # 5层卷积，每层输入都是前面所有层的输出拼接
         self.conv1 = nn.Conv2d(num_feat, num_grow_ch, 3, 1, 1)
         self.conv2 = nn.Conv2d(num_feat + num_grow_ch, num_grow_ch, 3, 1, 1)
         self.conv3 = nn.Conv2d(num_feat + 2 * num_grow_ch, num_grow_ch, 3, 1, 1)
@@ -46,6 +61,16 @@ class RealESRGANer(nn.Module):
     """RealESRGAN网络结构"""
 
     def __init__(self, num_in_ch=3, num_out_ch=3, num_feat=64, num_block=23, num_grow_ch=32, scale=4):
+        """
+               初始化RealESRGAN
+               参数:
+                   num_in_ch: 输入通道数
+                   num_out_ch: 输出通道数
+                   num_feat: 特征图通道数
+                   num_block: RRDB块数量
+                   num_grow_ch: 每层增长通道数
+                   scale: 放大倍数
+        """
         super(RealESRGANer, self).__init__()
         self.scale = scale
         self.num_feat = num_feat
@@ -70,12 +95,14 @@ class RealESRGANer(nn.Module):
         self.lrelu = nn.LeakyReLU(negative_slope=0.2, inplace=True)
 
     def forward(self, x):
+        """前向传播"""
+        # 初始卷积
         feat = self.conv_first(x)
         body_feat = feat
-
+        # 通过所有RRDB块
         for block in self.body:
             body_feat = block(body_feat)
-
+        # 主干网络后的卷积和残差连接
         body_feat = self.conv_body(body_feat)
         feat = feat + body_feat
 
@@ -88,7 +115,19 @@ class RealESRGANer(nn.Module):
 
 
 class ImageEnhancer:
+    """图像增强处理器"""
     def __init__(self, model_path, scale=4, tile_size=0, tile_pad=10, pre_pad=0, half=False):
+        """
+                初始化增强器
+                参数:
+                    model_path: 模型路径
+                    scale: 放大倍数
+                    tile_size: 分块大小(0表示不分块)
+                    tile_pad: 分块填充
+                    pre_pad: 预处理填充
+                    half: 是否使用半精度
+        """
+        # 自动选择设备
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.scale = scale
         self.tile_size = tile_size
@@ -112,17 +151,18 @@ class ImageEnhancer:
     def pre_process(self, img):
         """预处理图像"""
         img = img.astype(np.float32)
-        if np.max(img) > 256:  # 16-bit image
+        # 处理16位和8位图像
+        if np.max(img) > 256:
             max_range = 65535
         else:
             max_range = 255
         img = img / max_range
-
+        # 处理灰度图和RGBA图像
         if len(img.shape) == 2:  # 灰度图
             img = cv2.cvtColor(img, cv2.COLOR_GRAY2RGB)
         if img.shape[2] == 4:  # RGBA
             img = img[:, :, :3]
-
+        # 转换为PyTorch张量
         img = torch.from_numpy(np.transpose(img, (2, 0, 1))).float()
         img = img.unsqueeze(0).to(self.device)
         if self.half:
@@ -195,8 +235,10 @@ class ImageEnhancer:
 
     def post_process(self, output):
         """后处理"""
+        # 转换为numpy数组并限制范围
         output = output.data.squeeze().float().cpu().clamp_(0, 1).numpy()
         output = np.transpose(output, (1, 2, 0))
+        # 转换为8位图像
         output = (output * 255.0).round().astype(np.uint8)
         return output
 
@@ -210,7 +252,7 @@ class ImageEnhancer:
         # 预处理
         img_tensor = self.pre_process(img)
 
-        # 推理
+        # 推理(分块或整体处理)
         if self.tile_size > 0:
             output = self.tile_process(img_tensor)
         else:
@@ -222,6 +264,3 @@ class ImageEnhancer:
         # 保存
         cv2.imwrite(output_path, output_img)
         print(f"增强完成: {output_path}")
-
-
-

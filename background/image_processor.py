@@ -6,27 +6,26 @@ import torch.nn.functional as F
 
 
 class ImageProcessor:
+    """
+    高级图像处理类，提供图像合成、颜色匹配和边缘优化功能
+    支持前景背景融合、颜色调整、阴影添加等专业图像处理操作
+    """
     def __init__(self):
-        """
-        图像处理器，负责图像合成、颜色匹配和边缘优化
-        """
         pass
 
     def composite_image(self, foreground, background, mask, enhance_edges=True,
                         feather_strength=3, color_match=True):
         """
-        合成前景和背景图像
-
-        Args:
-            foreground: 前景图像 (BGR)
-            background: 背景图像 (BGR)
-            mask: 前景掩码 (0-255)
-            enhance_edges: 是否增强边缘
-            feather_strength: 羽化强度 (1-5)
-            color_match: 是否进行颜色匹配
-
-        Returns:
-            composite: 合成后的图像
+                合成前景和背景图像（主入口函数）
+                参数:
+                    foreground: 前景图像(BGR格式，numpy数组)
+                    background: 背景图像(BGR格式，numpy数组)
+                    mask: 前景掩码(0-255值，单通道)
+                    enhance_edges: 是否增强边缘(默认为True)
+                    feather_strength: 羽化强度(1-5，默认3)
+                    color_match: 是否进行颜色匹配(默认为True)
+                返回:
+                    composite: 合成后的图像(BGR格式)
         """
         # 确保图像尺寸一致
         h, w = foreground.shape[:2]
@@ -51,7 +50,14 @@ class ImageProcessor:
 
     def _process_mask(self, mask, feather_strength):
         """
-        处理掩码：羽化、平滑边缘
+        掩码预处理：羽化和平滑边缘
+
+        参数:
+            mask: 原始掩码(0-255)
+            feather_strength: 羽化强度
+
+        返回:
+            mask_float: 处理后的浮点掩码(0.0-1.0)
         """
         # 将掩码转换为浮点数
         mask_float = mask.astype(np.float32) / 255.0
@@ -85,7 +91,12 @@ class ImageProcessor:
 
     def _enhance_mask_edges(self, image, mask):
         """
-        基于图像边缘信息增强掩码边缘
+        基于图像边缘增强掩码边缘
+        参数:
+            image: 前景图像(BGR)
+            mask: 当前掩码
+        返回:
+            enhanced_mask: 增强后的掩码
         """
         # 转换为灰度图
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -119,7 +130,13 @@ class ImageProcessor:
 
     def _match_colors(self, foreground, background, mask):
         """
-        颜色匹配：调整前景颜色以匹配背景
+        前景颜色匹配背景
+        参数:
+            foreground: 前景图像
+            background: 背景图像
+            mask: 前景掩码
+        返回:
+            adjusted_foreground: 调整后的前景
         """
         # 计算前景和背景的平均颜色
         mask_binary = mask > 0.5
@@ -155,7 +172,13 @@ class ImageProcessor:
 
     def _blend_images(self, foreground, background, mask):
         """
-        混合前景和背景图像
+        混合前景和背景
+        参数:
+            foreground: 前景图像
+            background: 背景图像
+            mask: 混合掩码
+        返回:
+            blended: 混合后的图像
         """
         # 确保掩码是三通道
         if len(mask.shape) == 2:
@@ -173,7 +196,14 @@ class ImageProcessor:
 
     def adjust_lighting(self, image, brightness=0, contrast=1.0, saturation=1.0):
         """
-        调整图像的亮度、对比度和饱和度
+        调整图像光照参数
+        参数:
+            image: 输入图像
+            brightness: 亮度调整(-255到255)
+            contrast: 对比度系数(>1增强，<1减弱)
+            saturation: 饱和度系数(>1增强，<1减弱)
+        返回:
+            adjusted: 调整后的图像
         """
         # 转换为浮点数
         img_float = image.astype(np.float32)
@@ -195,7 +225,15 @@ class ImageProcessor:
 
     def add_shadow(self, composite, mask, shadow_offset=(10, 10), shadow_blur=15, shadow_opacity=0.3):
         """
-        添加阴影效果
+        添加投影效果
+        参数:
+            composite: 合成后的图像
+            mask: 前景掩码
+            shadow_offset: 阴影偏移量(x,y)
+            shadow_blur: 阴影模糊半径
+            shadow_opacity: 阴影透明度
+        返回:
+            shadowed: 带阴影的图像
         """
         h, w = composite.shape[:2]
         shadow_mask = np.zeros((h, w), dtype=np.float32)

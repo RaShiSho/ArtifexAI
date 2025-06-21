@@ -9,11 +9,11 @@ import warnings
 
 warnings.filterwarnings("ignore")
 
-# Try to import diffusion model related libraries
+# 尝试导入扩散模型相关库
 try:
     from diffusers import StableDiffusionPipeline
     from diffusers.utils import logging
-    logging.set_verbosity_error()
+    logging.set_verbosity_error() # 设置日志级别为错误
     DIFFUSERS_AVAILABLE = True
 except ImportError:
     DIFFUSERS_AVAILABLE = False
@@ -23,14 +23,18 @@ except ImportError:
 
 
 class EnhancedBackgroundGenerator:
+    """增强背景生成器，使用预训练的AI模型生成高质量背景"""
     def __init__(self, device='cuda' if torch.cuda.is_available() else 'cpu'):
         """
-        Enhanced background generator using pre-trained AI models
+                初始化增强背景生成器
+
+                参数:
+                    device: 使用的计算设备 ('cuda' 或 'cpu')
         """
         self.device = device
         self.stable_diffusion_pipe = None
 
-        # Style prompt library
+        # 风格提示词库
         self.style_prompts = {
             'nature': [
                 "beautiful landscape, mountains, forest, sunset, cinematic lighting, 8k, high detail",
@@ -81,14 +85,14 @@ class EnhancedBackgroundGenerator:
 
         print(f"Using device: {self.device}")
 
-        # Initialize models
+        # 初始化模型
         if DIFFUSERS_AVAILABLE:
             self._load_stable_diffusion()
         else:
             raise RuntimeError("Required packages not available. Please install diffusers.")
 
     def _load_stable_diffusion(self):
-        """Load Stable Diffusion model"""
+        """加载Stable Diffusion模型"""
         try:
             print("Loading Stable Diffusion model...")
             model_id = "runwayml/stable-diffusion-v1-5"
@@ -101,7 +105,7 @@ class EnhancedBackgroundGenerator:
             )
             self.stable_diffusion_pipe = self.stable_diffusion_pipe.to(self.device)
 
-            # Optimize memory usage
+            # 优化内存使用
             if self.device == 'cuda':
                 try:
                     self.stable_diffusion_pipe.enable_memory_efficient_attention()
@@ -116,19 +120,17 @@ class EnhancedBackgroundGenerator:
 
     def generate_background(self, width, height, style='nature', seed=None, quality='medium'):
         """
-        Generate high-quality background image using Stable Diffusion
-
-        Args:
-            width: Background width
-            height: Background height
-            style: Background style
-            seed: Random seed
-            quality: Quality setting ('low', 'medium', 'high')
-
-        Returns:
-            background: BGR format background image
+                使用Stable Diffusion生成高质量背景图像
+                参数:
+                    width: 背景宽度
+                    height: 背景高度
+                    style: 背景风格 ('nature', 'urban'等)
+                    seed: 随机种子(用于可重复结果)
+                    quality: 质量设置 ('low', 'medium', 'high')
+                返回:
+                    background: BGR格式的背景图像
         """
-        if seed is not None:
+        if seed is not None:  # 设置随机种子
             torch.manual_seed(seed)
             np.random.seed(seed)
             random.seed(seed)
@@ -139,12 +141,12 @@ class EnhancedBackgroundGenerator:
         return self._generate_with_stable_diffusion(width, height, style, quality)
 
     def _generate_with_stable_diffusion(self, width, height, style, quality):
-        """Generate background using Stable Diffusion"""
+        """使用Stable Diffusion生成背景"""
         try:
-            # Select prompt
+            # 随机选择提示词
             prompt = random.choice(self.style_prompts.get(style, self.style_prompts['nature']))
 
-            # Add quality enhancers
+            # 根据质量添加增强词
             quality_enhancers = {
                 'low': "simple, clean",
                 'medium': "detailed, high quality, professional",
@@ -154,10 +156,10 @@ class EnhancedBackgroundGenerator:
             enhanced_prompt = f"{prompt}, {quality_enhancers[quality]}"
             negative_prompt = "blurry, low quality, distorted, ugly, bad anatomy, watermark, text, signature"
 
-            # Adjust resolution for memory constraints
+            # 根据质量调整最大尺寸
             max_size = 768 if quality == 'high' else 512
 
-            # Calculate appropriate generation size (maintain aspect ratio)
+            # 计算合适的生成尺寸(保持宽高比)
             aspect_ratio = width / height
             if width > height:
                 gen_width = min(max_size, width)
@@ -166,14 +168,14 @@ class EnhancedBackgroundGenerator:
                 gen_height = min(max_size, height)
                 gen_width = int(gen_height * aspect_ratio)
 
-            # Ensure dimensions are multiples of 8 (Stable Diffusion requirement)
+            # 确保尺寸是8的倍数(Stable Diffusion要求)
             gen_width = (gen_width // 8) * 8
             gen_height = (gen_height // 8) * 8
 
             print(f"Generating background with prompt: {enhanced_prompt[:100]}...")
 
-            # Generate image
-            with torch.autocast(self.device):
+            # 生成图像
+            with torch.autocast(self.device):   # 自动混合精度
                 result = self.stable_diffusion_pipe(
                     prompt=enhanced_prompt,
                     negative_prompt=negative_prompt,
@@ -184,14 +186,14 @@ class EnhancedBackgroundGenerator:
                     generator=torch.Generator(device=self.device).manual_seed(random.randint(0, 1000000))
                 )
 
-            # Convert to OpenCV format
+            # 转换为PIL图像
             pil_image = result.images[0]
 
-            # Resize to target size if needed
+            # 如果需要，调整到目标尺寸
             if (gen_width, gen_height) != (width, height):
                 pil_image = pil_image.resize((width, height), Image.Resampling.LANCZOS)
 
-            # Convert to BGR format
+            # 转换为BGR格式
             background = cv2.cvtColor(np.array(pil_image), cv2.COLOR_RGB2BGR)
 
             print("Background generated successfully!")
@@ -202,11 +204,11 @@ class EnhancedBackgroundGenerator:
             raise RuntimeError("Failed to generate background with Stable Diffusion")
 
     def get_available_styles(self):
-        """Get list of available background styles"""
+        """获取可用的背景风格列表"""
         return list(self.style_prompts.keys())
 
     def cleanup_models(self):
-        """Clean up models to free memory"""
+        """清理模型以释放内存"""
         if self.stable_diffusion_pipe is not None:
             del self.stable_diffusion_pipe
             self.stable_diffusion_pipe = None

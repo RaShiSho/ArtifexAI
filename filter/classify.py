@@ -1,4 +1,3 @@
-# classify.py
 from .detector_yolo import YOLOPersonDetector
 from .classifier_clip import CLIPClassifier
 from .filters import apply_named_filter

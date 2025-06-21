@@ -11,11 +11,12 @@ import torch.nn.functional as F
 
 
 class SegmentationModel:
+    """
+    高级图像分割模型，提供两种分割方式：
+    1. 基于DeepLabV3的深度学习分割（主选）
+    2. 基于GrabCut的传统图像分割（备用）
+    """
     def __init__(self, device='cuda'):
-        """
-        初始化分割模型
-        使用DeepLabV3作为主要分割模型，结合边缘检测优化
-        """
         self.device = device
         self.model = None
         self.transform = transforms.Compose([
@@ -26,13 +27,13 @@ class SegmentationModel:
         self._load_model()
 
     def _load_model(self):
-        """加载预训练的分割模型"""
+        """加载DeepLabV3模型"""
         print("Loading segmentation model...")
         try:
             # 使用DeepLabV3预训练模型
             self.model = deeplabv3_resnet50(pretrained=True)
             self.model.to(self.device)
-            self.model.eval()
+            self.model.eval()  # 设置为评估模式
             print("DeepLabV3 model loaded successfully")
         except Exception as e:
             print(f"Error loading model: {e}")
@@ -43,28 +44,30 @@ class SegmentationModel:
         """
         分割图像中的主要对象
 
-        Args:
-            image: BGR格式的输入图像
-            use_edge_refinement: 是否使用边缘细化
+        参数:
+            image: BGR格式的输入图像(OpenCV格式)
+            use_edge_refinement: 是否使用边缘细化(默认True)
 
-        Returns:
-            mask: 二值掩码，前景为255，背景为0
+        返回:
+            mask: 二值掩码(前景255，背景0)
         """
         if self.model is not None:
+            # 使用深度学习模型分割
             return self._segment_with_deeplab(image, use_edge_refinement)
         else:
+            # 使用传统GrabCut算法分割
             return self._segment_with_grabcut(image)
 
     def _segment_with_deeplab(self, image, use_edge_refinement=True):
         """使用DeepLabV3进行分割"""
-        h, w = image.shape[:2]
+        h, w = image.shape[:2]  # 获取图像尺寸
 
         # 预处理
         rgb_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         pil_image = Image.fromarray(rgb_image)
         input_tensor = self.transform(pil_image).unsqueeze(0).to(self.device)
-
-        with torch.no_grad():
+        # 模型推理
+        with torch.no_grad():  # 禁用梯度计算
             output = self.model(input_tensor)['out']
             prediction = torch.argmax(output.squeeze(), dim=0).detach().cpu().numpy()
 
@@ -113,7 +116,12 @@ class SegmentationModel:
         return self._clean_mask(result_mask)
 
     def _clean_mask(self, mask):
-        """清理掩码：去噪声、填充洞洞"""
+        """
+        清理掩码:
+        1. 去除噪声
+        2. 填充孔洞
+        3. 保留最大连通区域
+        """
         # 形态学开运算去除噪声
         kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
         mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
@@ -170,15 +178,15 @@ class SegmentationModel:
 
     def create_trimap(self, mask, erode_size=10, dilate_size=10):
         """
-        创建三元图用于更精确的抠图
+        创建三元图(用于高级抠图)
 
-        Args:
+        参数:
             mask: 二值掩码
             erode_size: 腐蚀核大小
             dilate_size: 膨胀核大小
 
-        Returns:
-            trimap: 三元图 (0=背景, 128=未知, 255=前景)
+        返回:
+            trimap: 三元图(0=背景, 128=未知, 255=前景)
         """
         kernel_erode = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (erode_size, erode_size))
         kernel_dilate = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (dilate_size, dilate_size))

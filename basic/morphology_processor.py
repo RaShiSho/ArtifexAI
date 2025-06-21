@@ -18,6 +18,7 @@ class MorphologyProcessor:
 
     @staticmethod
     def morphology_processor(image_file, operation='Ideal', shape='cross', kernel_x=5, kernel_y=5):
+        ''' 形态学处理方法 '''
         try:
             img = MorphologyProcessor._read_image(image_file, grayscale=False)
 
@@ -25,15 +26,19 @@ class MorphologyProcessor:
             kernel = cv2.getStructuringElement(cv_shape, (int(kernel_x), int(kernel_y)))
 
             if operation.lower() == 'erosion':
+                # 腐蚀
                 result = cv2.erode(img, kernel)
 
             elif operation.lower() == 'dilation':
+                # 膨胀
                 result = cv2.dilate(img, kernel)
 
             elif operation.lower() == 'closing':
+                # 闭运算
                 result = cv2.morphologyEx(img, cv2.MORPH_CLOSE, kernel)
 
             elif operation.lower() == 'opening':
+                # 开运算
                 result = cv2.morphologyEx(img, cv2.MORPH_OPEN, kernel)
                 
             else:

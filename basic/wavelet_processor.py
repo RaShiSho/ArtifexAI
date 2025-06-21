@@ -13,6 +13,7 @@ class WaveletProcessor:
 
     @staticmethod
     def wavelet_transform(image_file, type='haar', level=1):
+        ''' 小波变换处理方法 '''
         try:
             img = WaveletProcessor._read_image(image_file, grayscale=False)
             level = int(level)

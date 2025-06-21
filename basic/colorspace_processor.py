@@ -5,6 +5,7 @@ import base64
 class ColorSpaceProcessor:
     @staticmethod
     def process_image(image_file, analysis_type='rgb'):
+        ''' 颜色空间分析处理方法 '''
         try:
             # 读取图片
             file_bytes = image_file.read()

@@ -9,6 +9,7 @@ matplotlib.use('Agg')  # 使用非交互式后端
 class HistogramProcessor:
     @staticmethod
     def process_image(image_file, histogram_type='gray'):
+        ''' 直方图生成方法 '''
         try:
             if histogram_type.lower() == 'rgb':
                 # 读取彩色图像
@@ -56,6 +57,7 @@ class HistogramProcessor:
     
     @staticmethod
     def equalize_histogram(image_file):
+        ''' 直方图均衡化方法 '''
         try:
             # 读取灰度图像
             gray_img = HistogramProcessor._read_image(image_file)
@@ -98,6 +100,7 @@ class HistogramProcessor:
     
     @staticmethod
     def linear_transform_histogram(image_file):
+        ''' 线性变换直方图方法 '''
         try:
             # 读取灰度图像
             gray_img = HistogramProcessor._read_image(image_file)
@@ -153,6 +156,7 @@ class HistogramProcessor:
 
     @staticmethod
     def normalize_histogram(source_file, target_file):
+        ''' 直方图正规化方法 '''
         try:
             # 读取原图像和目标图像
             source_img = HistogramProcessor._read_image(source_file)

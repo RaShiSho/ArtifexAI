@@ -6,6 +6,7 @@ import base64
 class ResizeProcessor:
     @staticmethod
     def process_image(image_file, width, height, tx=0, ty=0, angle=0):
+        ''' 图像缩放处理方法 '''
         try:
             # 读取图像文件为字节流
             file_bytes = image_file.read()

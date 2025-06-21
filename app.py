@@ -7,8 +7,11 @@ from flask import Flask, request, jsonify, render_template, send_file
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
 from PIL import Image
-os.environ["HTTP_PROXY"] = "http://127.0.0.1:10809"
-os.environ["HTTPS_PROXY"] = "http://127.0.0.1:10809"
+
+# 设置模型下载代理
+os.environ["HTTP_PROXY"] = "http://127.0.0.1:7890"
+os.environ["HTTPS_PROXY"] = "http://127.0.0.1:7890"
+
 # 基本图像处理模块
 from basic.resize_processor import ResizeProcessor
 from basic.colorspace_processor import ColorSpaceProcessor

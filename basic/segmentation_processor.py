@@ -9,6 +9,7 @@ matplotlib.use('Agg')  # 使用非交互式后端
 class SegmentationProcessor:
     @staticmethod
     def basic_enhance_detail(image_file):
+        ''' 基本增强细节方法 '''
         try:
             # 读取灰度图像
             gray_img = SegmentationProcessor._read_image(image_file)
@@ -47,6 +48,7 @@ class SegmentationProcessor:
 
     @staticmethod
     def edge_detection(image_file, operator='Roberts'):
+        ''' 边缘检测方法 '''
         try:
             # 转为灰度图
             gray = SegmentationProcessor._read_image(image_file)
@@ -99,20 +101,6 @@ class SegmentationProcessor:
 
                 result = cv2.convertScaleAbs(image1)
 
-                    # 为了对每个通道都进行卷积，需要分通道处理，再合并
-                    # channels = cv2.split(blurred)
-                    # filtered_channels = []
-                    # for ch in channels:
-                    #     ch = ch.astype(np.int32)
-                    #     r, c = ch.shape
-                    #     temp = np.zeros_like(ch)
-                    #     for i in range(2, r - 2):
-                    #         for j in range(2, c - 2):
-                    #             region = ch[i - 2:i + 3, j - 2:j + 3]
-                    #             temp[i, j] = np.sum(region * m1)
-                    #     filtered_channels.append(cv2.convertScaleAbs(temp))
-                    # result = cv2.merge(filtered_channels)
-
             else:
                 raise ValueError(f"不支持的算子类型：{operator}，可选值为 'roberts', 'sobel', 'laplacian', 'log'。")
 
@@ -135,6 +123,7 @@ class SegmentationProcessor:
 
     @staticmethod
     def line_change_detection(image_file):
+        ''' 线条变化检测方法 '''
         try:
             img = SegmentationProcessor._read_image(image_file, grayscale=False)
             gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)

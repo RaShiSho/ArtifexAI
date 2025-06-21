@@ -5,6 +5,7 @@ import base64
 class LogTransProcessor:
     @staticmethod
     def process_image(image_file, v):
+        ''' 对数变换处理方法 '''
         try:
             # 读取图片
             file_bytes = image_file.read()

@@ -17,6 +17,7 @@ class RestoreProcessor:
 
     @staticmethod
     def add_noise(image_file, type="saltpepper"):
+        ''' 噪声添加方法 '''
         try:
             img = RestoreProcessor._read_image(image_file, grayscale=False)
 
@@ -72,6 +73,7 @@ class RestoreProcessor:
 
     @staticmethod
     def meanFiltering(image_file, filter_x=3, filter_y=3):
+        ''' 均值滤波方法 '''
         try:
             img = RestoreProcessor._read_image(image_file, grayscale=False)
 
@@ -95,6 +97,7 @@ class RestoreProcessor:
 
     @staticmethod
     def statisticalFiltering(image_file, type="mid", filter_x=3, filter_y=3):
+        ''' 统计滤波方法 '''
         try:
             img = RestoreProcessor._read_image(image_file, grayscale=False)
 
@@ -154,6 +157,7 @@ class RestoreProcessor:
     
     @staticmethod
     def selectiveFiltering(image_file, up=220, down=20, type="bandPass"):
+        ''' 选择性滤波方法 '''
         try:
             img = RestoreProcessor._read_image(image_file, grayscale=False)
             down = int(down)

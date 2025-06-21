@@ -11,6 +11,7 @@ import math
 class SmoothProcessor:
     @staticmethod
     def frequency_domain_smoothing(image_file, filter='Ideal'):
+        ''' 频域平滑处理方法 '''
         try:
             img = SmoothProcessor._read_image(image_file, grayscale=False)
 
@@ -131,6 +132,7 @@ class SmoothProcessor:
     
     @staticmethod
     def spatial_domain_smoothing(image_file, filter='Mean'):
+        ''' 空域平滑处理方法 '''
         try:
             gray_img = SmoothProcessor._read_image(image_file)
                 

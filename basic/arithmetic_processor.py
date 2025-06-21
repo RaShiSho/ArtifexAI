@@ -5,6 +5,7 @@ import base64
 class ArithmeticProcessor:
     @staticmethod
     def process_images(image_file1, image_file2, operation='add'):
+        ''' 算术运算处理方法 '''
         try:
             # 读取第一张图片
             file_bytes1 = image_file1.read()

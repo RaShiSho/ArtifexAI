@@ -12,6 +12,7 @@ class SharpenProcessor:
 
     @staticmethod
     def frequency_domain_sharpening(image_file, filter='Ideal'):
+        ''' 频率域锐化处理方法 '''
         try:
             img = SharpenProcessor._read_image(image_file, grayscale=False)
 
@@ -135,6 +136,7 @@ class SharpenProcessor:
     
     @staticmethod
     def spatial_domain_sharpening(image_file, operator='Roberts'):
+        ''' 空间域锐化处理方法 '''
         try:
             img = SharpenProcessor._read_image(image_file)
 
